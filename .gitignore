@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+coverage/
+*.tsbuildinfo
+.env*
+!.env.example
+*.log
+*.db
+*.sqlite
+*.sqlite3
+*.pem
+*.key
+supabase/.branches/
+supabase/.temp/

@@ -28,4 +28,8 @@ describe("Phase 3 input validation", () => {
     expect(friendlyError({ message: "Load failed" })).toContain("authentication service");
     expect(friendlyError({ message: "Failed to fetch" })).toContain("Supabase configuration");
   });
+
+  it("explains a missing migration without blaming the user's roadmap data", () => {
+    expect(friendlyError({ message: "relation roadmap_plans does not exist" })).toContain("database migration");
+  });
 });

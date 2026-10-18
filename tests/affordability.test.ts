@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateAffordability, calculateWhatIf, formatPaise, parseRupeesToPaise, projectAnnualCosts } from "../lib/affordability";
+import { calculateAffordability, calculateWhatIf, formatPaise, hasCostEstimates, parseRupeesToPaise, projectAnnualCosts } from "../lib/affordability";
 
 const base = {
   durationYears: 4,
@@ -37,6 +37,11 @@ describe("exact-money affordability calculations", () => {
     expect(result.fundingGapPaise).toBe(0n);
     const insufficient = calculateAffordability({ ...base, monthlyContributionPaise: 0n, confirmedFundsPaise: 0n });
     expect(insufficient.fundingGapPaise).toBe(insufficient.totalCostPaise);
+  });
+
+  it("distinguishes an empty cost plan from an entered zero-cost estimate", () => {
+    expect(hasCostEstimates([])).toBe(false);
+    expect(hasCostEstimates([{ category: "Other", annualPaise: 0n, planYear: 1, annualIncreaseBps: 0 }])).toBe(true);
   });
 
   it("rejects contradictory contributions and keeps uncertain aid out", () => {

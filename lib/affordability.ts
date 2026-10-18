@@ -29,6 +29,14 @@ export type AffordabilityResult = {
   annualGapsPaise: Paise[];
 };
 
+/** Returns true when the family has entered at least one cost estimate.
+ * An empty plan is different from a genuinely zero-cost plan: the UI should
+ * not describe missing costs as a fully funded education plan.
+ */
+export function hasCostEstimates(expenses: ExpenseEstimate[]): boolean {
+  return expenses.length > 0;
+}
+
 const BPS = 10_000n;
 
 function assertNonNegative(value: bigint, label: string) {

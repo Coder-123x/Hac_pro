@@ -6,7 +6,7 @@ import { friendlyError } from "@/lib/supabase/messages";
 import { Button } from "@/components/ui/button";
 import { buildDecisionActions, calculateDecisionAffordability, recommendCollegePathways, type DecisionAction, type PathwayOption } from "@/lib/decision-support";
 import { confirmedScholarshipFunding, type ScholarshipApplication } from "@/lib/scholarships";
-import { formatPaise, type ExpenseEstimate } from "@/lib/affordability";
+import { formatPaise, hasCostEstimates, type ExpenseEstimate } from "@/lib/affordability";
 import { buildUnifiedActionPlan, type ActionPlanItem } from "@/lib/action-plan";
 import { useLanguage } from "@/components/i18n/language-provider";
 
@@ -95,7 +95,10 @@ export function DecisionDashboard({ familyId, userId, role }: Props) {
     const applications: ScholarshipApplication[] = (scholarshipResult.data ?? []).map((item: any) => ({ id: item.id, scholarshipId: item.scholarship_id, status: item.status, awardedAmountPaise: item.awarded_amount_paise === null ? null : asBigInt(item.awarded_amount_paise), receivedAmountPaise: item.received_amount_paise === null ? null : asBigInt(item.received_amount_paise), confirmedFunding: item.confirmed_funding, verificationStatus: item.scholarship_records?.verification_status }));
     let nextAffordability: ReturnType<typeof calculateDecisionAffordability> | null = null;
     if (budgetResult.data && !expenseResult.error) {
-      try { nextAffordability = calculateDecisionAffordability({ budget: { durationYears: budgetResult.data.plan_duration_years, monthly: asBigInt(budgetResult.data.monthly_family_contribution_paise), annual: asBigInt(budgetResult.data.annual_family_contribution_paise), confirmed: asBigInt(budgetResult.data.confirmed_available_funds_paise) }, expenses: (expenseResult.data ?? []).map((item) => ({ category: item.category, annualPaise: asBigInt(item.amount_paise), planYear: item.plan_year, annualIncreaseBps: item.annual_increase_bps })), confirmedScholarshipFundsPaise: confirmedScholarshipFunding(applications) }); } catch { nextAffordability = null; }
+      const expenseEstimates = (expenseResult.data ?? []).map((item) => ({ category: item.category, annualPaise: asBigInt(item.amount_paise), planYear: item.plan_year, annualIncreaseBps: item.annual_increase_bps }));
+      if (hasCostEstimates(expenseEstimates)) {
+        try { nextAffordability = calculateDecisionAffordability({ budget: { durationYears: budgetResult.data.plan_duration_years, monthly: asBigInt(budgetResult.data.monthly_family_contribution_paise), annual: asBigInt(budgetResult.data.annual_family_contribution_paise), confirmed: asBigInt(budgetResult.data.confirmed_available_funds_paise) }, expenses: expenseEstimates, confirmedScholarshipFundsPaise: confirmedScholarshipFunding(applications) }); } catch { nextAffordability = null; }
+      }
     }
     setAffordability(nextAffordability);
     const visibleScholarshipDeadlines: ScholarshipDeadline[] = (scholarshipResult.data ?? []).map((item: any) => ({ id: item.scholarship_id, name: item.scholarship_records?.name ?? "Recorded opportunity", deadline: item.scholarship_records?.deadline ?? null, status: item.status }));

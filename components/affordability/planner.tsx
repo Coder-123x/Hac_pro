@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   calculateAffordability,
   formatPaise,
+  hasCostEstimates,
   paiseToInput,
   parseRupeesToPaise,
   type AffordabilityResult,
@@ -227,8 +228,9 @@ export function AffordabilityPlanner({ familyId, role }: PlannerProps) {
           <Button className="mt-3" type="button" disabled={savingBudget} onClick={() => void saveBudget()}>{savingBudget ? "Saving…" : budget ? "Update funding setup" : "Save funding setup"}</Button>
         </div>
       )}
-      {budget && result && (
+      {budget && (
         <>
+          {result && hasCostEstimates(expenses.map((expense) => ({ category: expense.category, annualPaise: toPaise(expense.amount_paise), planYear: expense.plan_year, annualIncreaseBps: expense.annual_increase_bps }))) ? <>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <Metric label="Full-plan cost" value={formatPaise(result.totalCostPaise)} />
             <Metric label="Confirmed now" value={formatPaise(result.confirmedFundsPaise)} />
@@ -238,6 +240,7 @@ export function AffordabilityPlanner({ familyId, role }: PlannerProps) {
           </div>
           <p className="mt-3 text-sm text-slate-700">Funding coverage: <strong>{(Number(result.coverageBps) / 100).toFixed(1)}%</strong>. Calculations use integer paise and round inflated annual estimates to the nearest paise.</p>
           <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><caption className="mb-2 text-left font-medium text-slate-900">Annual affordability breakdown</caption><thead className="border-b border-slate-200 text-slate-600"><tr><th className="py-2 pr-4">Year</th><th className="py-2 pr-4">Estimated cost</th><th className="py-2 pr-4">Contribution</th><th className="py-2">Gap</th></tr></thead><tbody>{result.annualCostsPaise.map((cost, index) => <tr key={index} className="border-b border-slate-100"><td className="py-2 pr-4">Year {index + 1}</td><td className="py-2 pr-4">{formatPaise(cost)}</td><td className="py-2 pr-4">{formatPaise(result.annualContributionsPaise[index])}{index === 0 && result.confirmedFundsPaise > 0n ? " + funds now" : ""}</td><td className={`py-2 ${result.annualGapsPaise[index] > 0n ? "font-semibold text-rose-700" : "text-emerald-700"}`}>{formatPaise(result.annualGapsPaise[index])}</td></tr>)}</tbody></table></div>
+          </> : <p className="mt-5 rounded-md bg-slate-50 p-4 text-sm text-slate-700">Cost not entered yet. Add at least one annual expense estimate before viewing affordability coverage and funding gaps.</p>}
           <div className="mt-6 border-t border-slate-200 pt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><h4 className="font-medium text-slate-900">Annual expense estimates</h4><p className="text-xs text-slate-500">These are user-entered planning estimates, not verified college fees.</p></div>{role === "parent" && <Button type="button" onClick={() => setShowExpenseForm(!showExpenseForm)}>{showExpenseForm ? "Close" : "Add estimate"}</Button>}</div>{showExpenseForm && role === "parent" && <ExpenseEditor familyId={familyId} onSaved={() => { setShowExpenseForm(false); void load(); }} />}{expenses.length === 0 ? <p className="mt-4 rounded-md bg-slate-50 p-4 text-sm text-slate-600">No annual expense estimates yet. Add tuition, hostel, food, travel, equipment, examination fees, learning resources, or other costs.</p> : <ul className="mt-4 space-y-3">{expenses.map((expense) => <li key={expense.id} className="rounded-md border border-slate-200 p-3">{editingExpenseId === expense.id && role === "parent" ? <ExpenseEditor familyId={familyId} expense={expense} onSaved={() => { setEditingExpenseId(null); void load(); }} onCancelled={() => setEditingExpenseId(null)} /> : <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-medium text-slate-900">{expense.category} <span className="text-xs font-normal text-slate-500">· Year {expense.plan_year} · {displayPercent(expense.annual_increase_bps)}% annual increase</span></p><p className="text-sm text-slate-700">{formatPaise(toPaise(expense.amount_paise))} per year · {expense.status}</p>{expense.description && <p className="mt-1 text-xs text-slate-500">{expense.description}</p>}</div>{role === "parent" && <div className="flex gap-2"><button className="text-sm underline" type="button" onClick={() => setEditingExpenseId(expense.id)}>Edit</button><button className="text-sm text-rose-700 underline" type="button" onClick={() => void deleteExpense(expense)}>Delete</button></div>}</div>}</li>)}</ul>}</div>
         </>
       )}

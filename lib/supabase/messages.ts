@@ -14,6 +14,9 @@ export function friendlyError(error: SupabaseErrorLike): string {
   if (message.includes("load failed") || message.includes("failed to fetch") || message.includes("network")) {
     return "We could not reach the authentication service. Check your connection or Supabase configuration, then try again.";
   }
+  if (message.includes("relation") && message.includes("does not exist")) {
+    return "This feature is unavailable because its database migration has not been applied.";
+  }
   if (error?.code === "42501" || message.includes("permission denied")) {
     return "You do not have permission to perform that action.";
   }

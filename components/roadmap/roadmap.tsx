@@ -29,7 +29,7 @@ export function CareerRoadmap({ familyId, userId, role }: Props) {
   async function load() {
     const supabase = createClient();
     const { data, error } = await supabase.from("roadmap_plans").select("id, student_id, journey, career_goal, current_branch, current_year, skill_level, weekly_study_hours, target_date").eq("family_id", familyId).order("updated_at", { ascending: false });
-    if (error) { setMessage("Roadmap data is unavailable until the roadmap migration is applied."); return; }
+    if (error) { setMessage(friendlyError(error)); return; }
     const nextPlans = (data ?? []) as Plan[];
     setPlans(nextPlans);
     if (nextPlans.length) {

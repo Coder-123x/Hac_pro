@@ -40,9 +40,9 @@ export function InvitationAcceptance({ initialToken = "" }: { initialToken?: str
   }
 
   return (
-    <section className="w-full max-w-xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-sm font-medium text-slate-600">Family invitation</p>
-      <h1 className="mt-1 text-2xl font-semibold text-slate-950">Join a family workspace</h1>
+    <section className="editorial-panel w-full max-w-xl p-6">
+      <p className="eyebrow">07 — FAMILY INVITATION</p>
+      <h1 className="display-type mt-3 text-3xl font-semibold text-[var(--ink)]">Join a family workspace</h1>
       <p className="mt-2 text-sm leading-6 text-slate-600">Accept the invitation using the one-time token from the link you received. It will not be saved by this page.</p>
       <label className="mt-5 block text-sm font-medium text-slate-800" htmlFor="invitation-token">Invitation token</label>
       <input id="invitation-token" className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm" value={token} onChange={(event) => setToken(event.target.value)} autoComplete="off" spellCheck={false} />

@@ -1,17 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #172033;
+  --paper: #f4f0e8;
+  --paper-deep: #ebe5da;
+  --ink: #171717;
+  --muted: #625e57;
+  --line: rgba(23, 23, 23, 0.16);
+  --line-strong: rgba(23, 23, 23, 0.32);
+  --cobalt: #1746cf;
+  --cobalt-dark: #0c2b84;
+  --background: var(--paper);
+  --foreground: var(--ink);
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--paper);
+  background-image: linear-gradient(to right, rgba(23, 23, 23, 0.055) 1px, transparent 1px), linear-gradient(to bottom, rgba(23, 23, 23, 0.055) 1px, transparent 1px);
+  background-size: 80px 80px;
+  color: var(--ink);
+  font-family: var(--font-inter), Inter, "Noto Sans Telugu", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .display-type {
+  font-family: var(--font-space), "Space Grotesk", "Noto Sans Telugu", sans-serif;
+  letter-spacing: -0.035em;
+}
+
+input, select, textarea { min-height: 2.5rem; font: inherit; }
+input, select, textarea { border-color: var(--line-strong); background: rgba(255, 255, 255, 0.52); color: var(--ink); }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
+
+.editorial-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1.5rem; }
+.editorial-shell { position: relative; isolation: isolate; }
+
+.editorial-module, .workspace-frame, .workspace-intro {
+  border-color: var(--line) !important;
+  border-radius: 0 !important;
+  background: rgba(255, 255, 255, 0.43) !important;
+  box-shadow: none !important;
+}
+#decision-plan, #affordability, #college-comparison, #scholarships, #roadmap {
+  border-color: var(--line) !important;
+  border-radius: 0 !important;
+  background: rgba(255, 255, 255, 0.43) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.workspace-frame > section {
+  border-color: var(--line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.workspace-intro { border-style: dashed !important; }
+.editorial-panel { border: 1px solid var(--line); border-radius: 0; background: rgba(255, 255, 255, 0.5); box-shadow: none; }
+.glass-panel { border: 1px solid var(--line); background: rgba(255, 255, 255, 0.52); box-shadow: none; backdrop-filter: none; }
+.eyebrow, .section-index { color: var(--cobalt-dark); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; line-height: 1.2; text-transform: uppercase; }
+.editorial-link { color: var(--cobalt-dark); text-decoration: underline; text-underline-offset: 0.22em; }
+.editorial-link:hover { color: var(--cobalt); }
+::selection { background: #b9caff; color: var(--ink); }
+
+@media (max-width: 768px) {
+  body { background-size: 42px 42px; }
+  .editorial-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }

@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getSupabaseEnv } from "@/lib/supabase/config";
 import { friendlyError } from "@/lib/supabase/messages";
 import { validateEmail, validatePassword } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useLanguage } from "@/components/i18n/language-provider";
 
-export function AuthPanel() {
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+export function AuthPanel({ initialMode = "sign-in" }: { initialMode?: "sign-in" | "sign-up" }) {
+  const { t } = useLanguage();
+  const mode = initialMode;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -16,7 +20,7 @@ export function AuthPanel() {
 
   if (!getSupabaseEnv()) {
     return (
-      <section className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+      <section className="editorial-panel max-w-md p-5 text-sm text-amber-950">
         Supabase is not configured. Copy <code>.env.example</code> to <code>.env.local</code> and add the public URL and anon key.
       </section>
     );
@@ -38,7 +42,7 @@ export function AuthPanel() {
     if (result.error) {
       setMessage(friendlyError(result.error));
     } else if (mode === "sign-up" && !result.data.session) {
-      setMessage("Account created. Check your email to confirm it, then sign in.");
+      setMessage(t("accountCreated"));
     } else {
       window.location.reload();
     }
@@ -46,18 +50,19 @@ export function AuthPanel() {
   }
 
   return (
-    <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="glass-panel w-full max-w-md p-6 sm:p-8">
+      <div className="mb-6 flex items-center justify-between border-b border-[var(--line)] pb-4"><p className="eyebrow">EDU / ACCESS</p><LanguageSwitcher /></div>
       <div className="mb-5">
-        <p className="text-sm font-medium text-slate-600">Family workspace</p>
-        <h1 className="mt-1 text-2xl font-semibold text-slate-950">
-          {mode === "sign-in" ? "Sign in" : "Create your account"}
+        <p className="text-sm text-[var(--muted)]">{t("familyWorkspaceLabel")}</p>
+        <h1 className="display-type mt-2 text-3xl font-semibold text-[var(--ink)]">
+          {mode === "sign-in" ? t("signIn") : t("createAccount")}
         </h1>
       </div>
       <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
         <label className="block text-sm font-medium text-slate-800">
-          Email
+          {t("email")}
           <input
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-950 outline-none focus:border-slate-600 focus:ring-2 focus:ring-slate-200"
+            className="mt-2 block w-full rounded-sm border px-3 py-2 text-[var(--ink)] outline-none"
             type="email"
             autoComplete="email"
             value={email}
@@ -66,9 +71,9 @@ export function AuthPanel() {
           />
         </label>
         <label className="block text-sm font-medium text-slate-800">
-          Password
+          {t("password")}
           <input
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-950 outline-none focus:border-slate-600 focus:ring-2 focus:ring-slate-200"
+            className="mt-2 block w-full rounded-sm border px-3 py-2 text-[var(--ink)] outline-none"
             type="password"
             autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
             value={password}
@@ -78,16 +83,15 @@ export function AuthPanel() {
         </label>
         {message && <p className="text-sm text-rose-700" role="alert">{message}</p>}
         <Button className="w-full" type="submit" disabled={busy}>
-          {busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
+          {busy ? t("pleaseWait") : mode === "sign-in" ? t("signIn") : t("createAccount")}
         </Button>
       </form>
-      <button
-        className="mt-4 text-sm text-slate-700 underline underline-offset-4 hover:text-slate-950"
-        type="button"
-        onClick={() => { setMode(mode === "sign-in" ? "sign-up" : "sign-in"); setMessage(null); }}
+      <Link
+        className="editorial-link mt-5 inline-block text-sm"
+        href={mode === "sign-in" ? "/signup" : "/"}
       >
-        {mode === "sign-in" ? "Need an account? Sign up" : "Already have an account? Sign in"}
-      </button>
+        {mode === "sign-in" ? t("needAccount") : t("alreadyHaveAccount")}
+      </Link>
     </section>
   );
 }

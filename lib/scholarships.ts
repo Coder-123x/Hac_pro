@@ -1,12 +1,14 @@
 import type { Paise } from "./affordability";
+import type { OpportunityLifecycle } from "./opportunities";
 
 export type ScholarshipStatus = "saved" | "planning" | "applied" | "approved" | "rejected" | "received";
 export type ScholarshipRecord = {
   id: string; name: string; provider: string; stateCode: string; category: string | null;
   incomeLimitPaise: Paise | null; course: string | null; institutionType: string | null;
   deadline: string | null; verificationStatus: "official_verified" | "secondary_verified" | "unverified" | "missing";
+  applicableAcademicYear?: number | null; requiredDocuments?: string[]; applicationSteps?: string[];
 };
-export type ScholarshipApplication = { id: string; scholarshipId: string; status: ScholarshipStatus; awardedAmountPaise: Paise | null; receivedAmountPaise: Paise | null; confirmedFunding: boolean; verificationStatus?: ScholarshipRecord["verificationStatus"] };
+export type ScholarshipApplication = { id: string; scholarshipId: string; status: ScholarshipStatus; opportunityState?: OpportunityLifecycle; awardedAmountPaise: Paise | null; receivedAmountPaise: Paise | null; confirmedFunding: boolean; verificationStatus?: ScholarshipRecord["verificationStatus"] };
 export type ScholarshipFilters = { stateCode?: string; category?: string; incomePaise?: Paise; course?: string; institutionType?: string; deadlineBefore?: string; status?: ScholarshipStatus | "not_tracked" };
 
 export function filterScholarships(records: ScholarshipRecord[], applications: ScholarshipApplication[], filters: ScholarshipFilters): ScholarshipRecord[] {

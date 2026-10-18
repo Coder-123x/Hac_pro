@@ -8,6 +8,8 @@ coverage/
 .env*
 !.env.example
 *.log
+*.DS_Store
+.DS_Store
 *.db
 *.sqlite
 *.sqlite3

@@ -1,4 +1,4 @@
-import { AuthPanel } from "@/components/auth/auth-panel";
+import { LandingPage } from "@/components/landing/landing-page";
 import { Workspace, type FamilyMembership } from "@/components/workspace/workspace";
 import { getSupabaseEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -12,20 +12,13 @@ type MembershipRow = {
 
 export default async function Home() {
   if (!getSupabaseEnv()) {
-    return (
-      <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-16">
-        <p className="text-sm font-medium text-slate-600">Project foundation</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Engineering education planning for families</h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-700">Add Supabase environment variables to start the authenticated family workspace.</p>
-        <div className="mt-8"><AuthPanel /></div>
-      </main>
-    );
+    return <LandingPage />;
   }
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-16"><AuthPanel /></main>;
+    return <LandingPage />;
   }
 
   const { data: rows, error } = await supabase
@@ -54,5 +47,5 @@ export default async function Home() {
     });
   }
 
-  return <Workspace email={user.email ?? "authenticated user"} memberships={memberships} />;
+  return <Workspace email={user.email ?? "authenticated user"} userId={user.id} memberships={memberships} />;
 }

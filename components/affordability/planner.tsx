@@ -13,6 +13,7 @@ import {
   type ExpenseEstimate,
 } from "@/lib/affordability";
 import { confirmedScholarshipFunding, type ScholarshipApplication } from "@/lib/scholarships";
+import { useLanguage } from "@/components/i18n/language-provider";
 
 type PlannerProps = { familyId: string; role: "parent" | "student" };
 type BudgetRecord = {
@@ -134,6 +135,7 @@ function ExpenseEditor({
 }
 
 export function AffordabilityPlanner({ familyId, role }: PlannerProps) {
+  const { t } = useLanguage();
   const [budget, setBudget] = useState<BudgetRecord | null>(null);
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
   const [confirmedScholarshipFundsPaise, setConfirmedScholarshipFundsPaise] = useState(0n);
@@ -201,13 +203,13 @@ export function AffordabilityPlanner({ familyId, role }: PlannerProps) {
     if (error) setMessage(friendlyError(error)); else await load();
   }
 
-  if (loading) return <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600" aria-busy="true">Loading affordability plan…</section>;
+  if (loading) return <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600" aria-busy="true">{t("loading")}</section>;
 
   return (
-    <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section id="affordability" className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><p className="text-sm font-medium text-slate-600">Phase 4</p><h3 className="text-xl font-semibold text-slate-950">Education budget and affordability</h3></div>
-        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-900">All figures are estimates</span>
+        <div><p className="text-sm font-medium text-slate-600">Phase 4</p><h3 className="text-xl font-semibold text-slate-950">{t("affordabilityTitle")}</h3></div>
+        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-900">{t("estimatesNotice")}</span>
       </div>
       {message && <p className="mt-4 rounded-md bg-rose-50 p-3 text-sm text-rose-800" role="alert">{message}</p>}
       {!budget && role === "student" && <p className="mt-5 rounded-md bg-slate-50 p-4 text-sm text-slate-700">A parent must set up the family education budget before estimates can be added.</p>}

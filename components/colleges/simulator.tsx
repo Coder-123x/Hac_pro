@@ -6,6 +6,8 @@ import { friendlyError } from "@/lib/supabase/messages";
 import { Button } from "@/components/ui/button";
 import { calculateCollegeAffordability, compareRankToCutoff } from "@/lib/college-simulator";
 import { formatPaise, parseRupeesToPaise, type Paise } from "@/lib/affordability";
+import { validateCollegeImport, type ProvenanceStatus } from "@/lib/data-quality";
+import { useLanguage } from "@/components/i18n/language-provider";
 
 type Props = { familyId: string; role: "parent" | "student" };
 type Comparison = { id: string; family_id: string; student_id: string; title: string; eapcet_rank: number; preferred_branches: string[] };
@@ -22,6 +24,7 @@ const statusLabels = { official_verified: "Official verified", historical: "Hist
 function bigintValue(value: string | number | null): bigint | null { return value === null ? null : BigInt(String(value)); }
 
 export function CollegeSimulator({ familyId, role }: Props) {
+  const { t } = useLanguage();
   const [userId, setUserId] = useState<string | null>(null);
   const [comparisons, setComparisons] = useState<Comparison[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
@@ -72,6 +75,8 @@ export function CollegeSimulator({ familyId, role }: Props) {
     let tuition: Paise | null = null; let living: Paise | null = null;
     try { tuition = form.tuition ? parseRupeesToPaise(form.tuition) : null; living = form.living ? parseRupeesToPaise(form.living) : null; } catch (error) { return setMessage(error instanceof Error ? error.message : "Enter valid rupee amounts."); }
     if (form.status === "official_verified" && (!form.source || !form.year || !form.verified || cutoff === null)) return setMessage("Official data requires cutoff, year, source URL and last-verified date.");
+    const qualityIssues = validateCollegeImport({ collegeName: form.college, branchName: form.branch, cutoffRank: cutoff, cutoffYear: year, sourceUrl: form.source || null, lastVerifiedAt: form.verified || null, dataStatus: form.status as ProvenanceStatus, annualTuitionPaise: tuition, annualHostelLivingPaise: living });
+    if (qualityIssues.length) return setMessage(qualityIssues[0].message);
     setBusy(true); setMessage(null);
     const { error } = await createClient().from("college_comparison_options").insert({ comparison_id: comparison.id, family_id: familyId, college_name: form.college.trim(), branch_name: form.branch.trim(), cutoff_rank: cutoff, cutoff_year: year, cutoff_category: form.category.trim() || null, counselling_round: form.round.trim() || null, source_url: form.source.trim() || null, last_verified_at: form.verified || null, data_status: form.status, annual_tuition_paise: tuition?.toString() ?? null, annual_hostel_living_paise: living?.toString() ?? null, created_by: userId });
     if (error) setMessage(friendlyError(error)); else { setForm(emptyOption); await load(); }
@@ -82,9 +87,9 @@ export function CollegeSimulator({ familyId, role }: Props) {
   const funding = budget ? { monthlyContributionPaise: bigintValue(budget.monthly_family_contribution_paise) ?? 0n, annualContributionPaise: bigintValue(budget.annual_family_contribution_paise) ?? 0n, confirmedFundsPaise: bigintValue(budget.confirmed_available_funds_paise) ?? 0n } : null;
   const visibleOptions = useMemo(() => options.filter((option) => !primary || option.comparison_id === primary.id), [options, primary]);
 
-  if (loading) return <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600" aria-busy="true">Loading AP EAPCET comparisons…</section>;
-  return <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-    <div><p className="text-sm font-medium text-slate-600">Phase 5</p><h3 className="text-xl font-semibold text-slate-950">AP EAPCET college and branch affordability</h3><p className="mt-1 text-sm text-slate-600">Manual comparison workspace. Cutoffs are guidance, not admission guarantees.</p></div>
+  if (loading) return <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600" aria-busy="true">{t("loading")}</section>;
+  return <section id="college-comparison" className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div><p className="text-sm font-medium text-slate-600">Phase 5</p><h3 className="text-xl font-semibold text-slate-950">{t("collegeTitle")}</h3><p className="mt-1 text-sm text-slate-600">{t("reviewSources")}</p></div>
     {message && <p className="mt-4 rounded-md bg-rose-50 p-3 text-sm text-rose-800" role="alert">{message}</p>}
     {role === "student" && <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4"><h4 className="font-medium text-slate-900">Your rank and preferences</h4><div className="mt-3 grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">AP EAPCET rank<input className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-normal" inputMode="numeric" value={rank} onChange={(event) => setRank(event.target.value)} placeholder="Positive rank" /></label><label className="text-sm font-medium">Comparison name<input className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-normal" value={title} onChange={(event) => setTitle(event.target.value)} /></label><label className="text-sm font-medium sm:col-span-2">Preferred branches<input className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-normal" value={branches} onChange={(event) => setBranches(event.target.value)} placeholder="CSE, ECE, Mechanical" /></label></div><Button className="mt-3" type="button" disabled={busy} onClick={() => void saveComparison()}>Save rank and preferences</Button></div>}
     {!primary ? <p className="mt-4 rounded-md bg-slate-50 p-4 text-sm text-slate-600">No comparison has been saved yet. A student can create one above.</p> : <>

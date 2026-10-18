@@ -34,19 +34,24 @@ export function AuthPanel({ initialMode = "sign-in" }: { initialMode?: "sign-in"
 
     setBusy(true);
     setMessage(null);
-    const supabase = createClient();
-    const result = mode === "sign-in"
-      ? await supabase.auth.signInWithPassword({ email: email.trim(), password })
-      : await supabase.auth.signUp({ email: email.trim(), password });
+    try {
+      const supabase = createClient();
+      const result = mode === "sign-in"
+        ? await supabase.auth.signInWithPassword({ email: email.trim(), password })
+        : await supabase.auth.signUp({ email: email.trim(), password });
 
-    if (result.error) {
-      setMessage(friendlyError(result.error));
-    } else if (mode === "sign-up" && !result.data.session) {
-      setMessage(t("accountCreated"));
-    } else {
-      window.location.reload();
+      if (result.error) {
+        setMessage(friendlyError(result.error));
+      } else if (mode === "sign-up" && !result.data.session) {
+        setMessage(t("accountCreated"));
+      } else {
+        window.location.reload();
+      }
+    } catch (error) {
+      setMessage(friendlyError(error instanceof Error ? { message: error.message } : null));
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   return (

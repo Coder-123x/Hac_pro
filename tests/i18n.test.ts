@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { translations } from "../lib/i18n";
 
 describe("language support", () => {
@@ -15,5 +17,12 @@ describe("language support", () => {
     expect(translations.te.reviewSources).toContain("మూలాన్ని");
     expect(translations.te.unknown).toBe("తెలియదు");
     expect(translations.te.notAvailable).toContain("అందుబాటులో");
+  });
+
+  it("uses Telugu-specific heading metrics instead of tight Latin tracking", () => {
+    const styles = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8");
+    expect(styles).toContain('html[lang="te"] h1');
+    expect(styles).toContain("letter-spacing: normal;");
+    expect(styles).toContain("line-height: 1.28;");
   });
 });

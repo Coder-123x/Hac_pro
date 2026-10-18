@@ -11,6 +11,9 @@ export function friendlyError(error: SupabaseErrorLike): string {
   }
   if (message.includes("different email")) return "This invitation was issued to a different email address.";
   if (message.includes("only an active parent")) return "Only an active family parent can send invitations.";
+  if (message.includes("load failed") || message.includes("failed to fetch") || message.includes("network")) {
+    return "We could not reach the authentication service. Check your connection or Supabase configuration, then try again.";
+  }
   if (error?.code === "42501" || message.includes("permission denied")) {
     return "You do not have permission to perform that action.";
   }

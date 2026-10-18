@@ -12,7 +12,6 @@ import { ScholarshipNavigator } from "@/components/scholarships/navigator";
 import { FamilySharing } from "@/components/sharing/family-sharing";
 import { CareerRoadmap } from "@/components/roadmap/roadmap";
 import { DecisionDashboard } from "@/components/dashboard/decision-dashboard";
-import { GuidancePanel } from "@/components/ai/guidance-panel";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { useLanguage } from "@/components/i18n/language-provider";
 
@@ -159,7 +158,6 @@ export function Workspace({ email, userId, memberships }: { email: string; userI
               <p className="mt-1 text-sm text-slate-600">Start with your direction, then work through budget, options, opportunities and career milestones below.</p>
             </div>
             <DecisionDashboard familyId={membership.familyId} userId={userId} role={membership.role} />
-            <GuidancePanel />
             <AffordabilityPlanner familyId={membership.familyId} role={membership.role} />
             <CollegeSimulator familyId={membership.familyId} role={membership.role} />
             <ScholarshipNavigator familyId={membership.familyId} role={membership.role} />

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validateEmail, validateInvitationToken, validatePassword, validateWorkspaceName } from "../lib/validation";
+import { friendlyError } from "../lib/supabase/messages";
 
 describe("Phase 3 input validation", () => {
   it("accepts valid email and password values", () => {
@@ -21,5 +22,10 @@ describe("Phase 3 input validation", () => {
     expect(validateInvitationToken("").ok).toBe(false);
     expect(validateInvitationToken("one-time-token").ok).toBe(true);
     expect(validateInvitationToken("x".repeat(513)).ok).toBe(false);
+  });
+
+  it("turns authentication transport failures into actionable messages", () => {
+    expect(friendlyError({ message: "Load failed" })).toContain("authentication service");
+    expect(friendlyError({ message: "Failed to fetch" })).toContain("Supabase configuration");
   });
 });
